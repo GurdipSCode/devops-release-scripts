@@ -1,0 +1,83 @@
+# .coderabbit.yaml
+# CodeRabbit config tuned for PowerShell (.ps1) in CI/CD + Octopus-style scripts
+
+language: en-US
+
+reviews:
+  # Keep PR reviews focused and actionable
+  high_level_summary: true
+  review_status: true
+  poem: false
+
+  # PowerShell scripts often have edge-case bugs—be a bit stricter
+  request_changes_workflow: true
+
+  # Encourage consistent formatting / safety patterns
+  auto_review:
+    enabled: true
+    drafts: false
+
+  # Limit noise
+  comment_limits:
+    max_comments: 30
+    max_suggestions: 15
+
+  # Prefer “suggestions” over paragraphs
+  inline_comments: true
+
+  # What to look for in .ps1
+  profile: |
+    You are reviewing PowerShell (.ps1) scripts used in CI/CD (Octopus Deploy, TeamCity, Buildkite).
+    Prioritize correctness, safety, idempotency, and clear failure modes.
+    Focus on: strict mode, error handling, quoting/escaping, avoiding Invoke-Expression,
+    robust parameter validation, and predictable exit codes.
+
+  # File filters
+  path_filters:
+    include:
+      - "**/*.ps1"
+      - "**/*.psm1"
+      - "**/*.psd1"
+    exclude:
+      - "**/vendor/**"
+      - "**/node_modules/**"
+      - "**/dist/**"
+      - "**/bin/**"
+      - "**/obj/**"
+      - "**/.terraform/**"
+
+  # Style preferences
+  guidelines:
+    - "Prefer Set-StrictMode -Version Latest at top of scripts."
+    - "Use $ErrorActionPreference='Stop' and/or -ErrorAction Stop on cmdlets that matter."
+    - "Prefer try/catch with explicit exit codes; avoid silent failures."
+    - "Avoid Invoke-Expression; use the call operator (&) with an argument array instead."
+    - "Validate inputs: [ValidateNotNullOrEmpty()], [ValidatePattern()] for URLs, etc."
+    - "Use Join-Path; avoid manual path concatenation where possible."
+    - "Use Out-File -Encoding utf8 (or utf8BOM if required) consistently."
+    - "When writing to stderr in Octopus, include '##octopus[stderr-error]' before failing."
+    - "Ensure scripts are non-interactive (no prompts) and deterministic."
+    - "Avoid writing secrets to logs; mask or omit sensitive env/Octopus variables."
+    - "If using external tools (node/npx), check presence and version, and handle missing tools cleanly."
+
+  # Tooling recommendations in review comments
+  suggest_tools:
+    - "PSScriptAnalyzer (PSUseDeclaredVarsMoreThanAssignments, PSAvoidUsingInvokeExpression, etc.)"
+    - "PowerShell strict mode + consistent quoting"
+    - "Prefer Start-Process or & over Invoke-Expression"
+
+# Optional: apply extra scrutiny to scripts under these folders
+labels:
+  - name: "powershell"
+    paths:
+      - "**/*.ps1"
+      - "**/*.psm1"
+
+# Optional: block approvals if certain patterns appear
+# (CodeRabbit will flag these; it can't truly “block”, but it can request changes.)
+security:
+  patterns:
+    - "Invoke-Expression"
+    - "iex "
+    - "ConvertTo-SecureString -AsPlainText"
+    - "Write-Host.*(token|secret|password|apikey|key)"
