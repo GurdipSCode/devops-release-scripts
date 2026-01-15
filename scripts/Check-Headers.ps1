@@ -1,9 +1,6 @@
 # Octopus Deploy - Security Headers Check with Environment-Aware URL Selection
 param(
-    [string]$Url = $(
-            $OctopusParameters["Netlify.SiteURL"]
-        }
-    ),
+    [string]$Url = $($OctopusParameters["Netlify.SiteURL"]),
     [string]$MinimumScore = $OctopusParameters["SecurityCheck.MinimumScore"] ?? "70",
     [bool]$FailOnLowScore = [System.Convert]::ToBoolean($OctopusParameters["SecurityCheck.FailOnLowScore"] ?? "true"),
     [bool]$DetailedOutput = [System.Convert]::ToBoolean($OctopusParameters["SecurityCheck.DetailedOutput"] ?? "true")
